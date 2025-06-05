@@ -1,0 +1,49 @@
+pipeline {
+  agent any
+
+  environment {
+    TF_DIR = "terraform"
+    ANSIBLE_DIR = "ansible"
+  }
+
+  stages {
+    stage('Checkout') {
+      steps {
+        checkout scm
+      }
+    }
+
+    stage('Terraform Init') {
+      steps {
+        dir("${TF_DIR}") {
+          sh 'terraform init'
+        }
+      }
+    }
+
+    stage('Terraform Apply') {
+      steps {
+        dir("${TF_DIR}") {
+          sh 'terraform apply -auto-approve'
+        }
+      }
+    }
+
+    stage('Ansible Configure HTTPD') {
+      steps {
+        dir("${ANSIBLE_DIR}") {
+          sh '''
+            chmod 400 ~/.ssh/id_rsa
+            ansible-playbook -i hosts httpd.yml --private-key=~/.ssh/terraform_key -u ec2-user
+          '''
+        }
+      }
+    }
+  }
+
+  post {
+    always {
+      echo 'Pipeline Finished!'
+    }
+  }
+}
