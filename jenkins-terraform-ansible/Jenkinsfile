@@ -25,10 +25,10 @@ pipeline {
       steps {
         dir("${TF_DIR}") {
           sh '''
-	    terraform apply -auto-approve
-	    terraform taint aws_instance.httpd
+	          terraform apply -auto-approve
+	          terraform taint aws_instance.httpd
             terraform apply -target=aws_instance.httpd
-	  '''
+	        '''
         }
       }
     }
