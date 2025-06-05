@@ -2,14 +2,14 @@ pipeline {
   agent any
 
   environment {
-    TF_DIR = "terraform"
-    ANSIBLE_DIR = "ansible"
+    TF_DIR = "jenkins-terraform-ansible/terraform"
+    ANSIBLE_DIR = "jenkins-terraform-ansible/ansible"
   }
 
   stages {
     stage('Checkout') {
       steps {
-        checkout scm
+        git credentialsId: '143', url: 'https://github.com/kovuru-siva/hellow.git'
       }
     }
 
@@ -24,12 +24,33 @@ pipeline {
     stage('Terraform Apply') {
       steps {
         dir("${TF_DIR}") {
-          sh '''
-	          terraform apply -auto-approve
-	        //   terraform taint aws_instance.httpd
-          //   terraform apply -target=aws_instance.httpd
-	        '''
+          sh 'terraform apply -auto-approve'
+          sh 'terraform output -raw pub_ip > pub_ip.txt'
         }
+      }
+    }
+    
+    stage('wait untill instance comeup'){
+      steps {
+        script {
+          //reading the ip from the file
+          def instance_ip = readFile('pub_ip.txt').trim()
+          echo "Waiting for EC2 instance at ${instance_ip} to be reachable..."
+          // Wait loop using shell (ping 3 times max)
+          sh '''
+          for i in {1..7}; do
+            if ping -c 1 ${instance_ip} >/dev/null 2>&1; then
+              echo "Host ${instance_ip} is reachable"
+              break
+            else
+              echo "Waiting for host ${instance_ip}..."
+              sleep 10
+          fi
+          done
+          '''
+
+        }
+
       }
     }
 
@@ -42,6 +63,13 @@ pipeline {
           '''
         }
       }
+    }
+    stage('terraform destroy') {
+        steps {
+            dir("${TF_DIR}") {
+                sh 'terraform destroy -auto-approve'
+            }
+        }
     }
   }
 

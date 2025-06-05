@@ -1,4 +1,4 @@
-provider "aws" {
+  provider "aws" {
   region = var.region
 }
 
@@ -36,4 +36,9 @@ resource "aws_instance" "httpd" {
   provisioner "local-exec" {
     command = "echo [web] > ../ansible/hosts && echo ${self.public_ip} >> ../ansible/hosts"
   }
+}
+
+output "pub_ip" {
+  value = aws_instance.httpd.public_ip
+  
 }
