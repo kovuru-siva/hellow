@@ -3,6 +3,10 @@
   become: true
 
   tasks:
+    - name: wait untill host come up.
+      ansible.builtin.wait_for_connection:
+        timeout: 120
+
     - name: Install HTTPD
       yum:
         name: httpd
