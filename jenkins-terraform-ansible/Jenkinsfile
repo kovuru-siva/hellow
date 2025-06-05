@@ -33,7 +33,7 @@ pipeline {
       steps {
         dir("${ANSIBLE_DIR}") {
           sh '''
-            chmod 400 ~/.ssh/id_rsa
+            chmod 400 ~/.ssh/terraform_key
             ansible-playbook -i hosts httpd.yml --private-key=~/.ssh/terraform_key -u ec2-user
           '''
         }
