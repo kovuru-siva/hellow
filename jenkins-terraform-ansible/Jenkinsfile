@@ -29,30 +29,35 @@ pipeline {
         }
       }
     }
-    
-    stage('wait untill instance comeup'){
-      steps {
-        script {
-          //reading the ip from the file
-          def instance_ip = readFile('pub_ip.txt').trim()
-          echo "Waiting for EC2 instance at ${instance_ip} to be reachable..."
-          // Wait loop using shell (ping 3 times max)
-          sh '''
-          for i in {1..7}; do
-            if ping -c 1 ${instance_ip} >/dev/null 2>&1; then
-              echo "Host ${instance_ip} is reachable"
-              break
-            else
-              echo "Waiting for host ${instance_ip}..."
-              sleep 10
-          fi
-          done
-          '''
-
-        }
-
+    stage('Wait for 3 min') {
+      steps{
+        sleep time: 5, unit: 'MINUTES'
       }
     }
+    
+    // stage('wait untill instance comeup'){
+    //   steps {
+    //     script {
+    //       //reading the ip from the file
+    //       def instance_ip = readFile('pub_ip.txt').trim()
+    //       echo "Waiting for EC2 instance at ${instance_ip} to be reachable..."
+    //       // Wait loop using shell (ping 3 times max)
+    //       sh """
+    //       for i in {1..7}; do
+    //         if ping -c 1 ${instance_ip} >/dev/null 2>&1; then
+    //           echo "Host ${instance_ip} is reachable"
+    //           break
+    //         else
+    //           echo "Waiting for host ${instance_ip}..."
+    //           sleep 10
+    //       fi
+    //       done
+    //       """
+
+    //     }
+
+    //   }
+    // }
 
     stage('Ansible Configure HTTPD') {
       steps {
