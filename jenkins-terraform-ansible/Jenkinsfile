@@ -29,7 +29,7 @@ pipeline {
         }
       }
     }
-    stage('Wait for 3 min') {
+    stage('Wait to comeup the instance for 3 min') {
       steps{
         sleep time: 5, unit: 'MINUTES'
       }
